@@ -7,6 +7,7 @@ import numpy as np
 ckpt_path = "mobilenetV2_training"
 image_path = "D:\\Gogi\\Photos\\Renny3\\20200809_191305.jpg"
 dataset_path = "D:\\tmp\\cars2\\car_photos_2"
+
 img_dim = 224
 IMG_SIZE = (img_dim, img_dim)
 batch_size = 32
