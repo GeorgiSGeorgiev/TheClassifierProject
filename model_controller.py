@@ -1,10 +1,24 @@
 import numpy as np
 import load_dataset
 import graph_plotter
-from keras.preprocessing import image
 import tensorflow as tf
 import mobilenetV2_init as init
+
+from tensorflow.keras import layers
+from keras.preprocessing import image
 from tensorflow.keras.layers.experimental import preprocessing
+
+
+def unfreeze_model(in_model, back_layers_count):
+    # We unfreeze the top 60 layers while leaving BatchNorm layers frozen
+    for layer in in_model.layers[-back_layers_count:]:
+        if not isinstance(layer, layers.BatchNormalization):
+            layer.trainable = True
+
+    optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
+    in_model.compile(
+        optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"]
+    )
 
 
 # UNDER CONSTRUCTION
