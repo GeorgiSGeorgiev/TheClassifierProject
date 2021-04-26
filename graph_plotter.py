@@ -47,3 +47,14 @@ def plot_hist(training_data):
     plt.xlabel("epoch")
     plt.legend(["train", "validation"], loc="upper left")
     plt.show()
+
+
+def show_9_image_predictions(images, labels, class_names):
+    plt.figure(figsize=(10, 10))
+    for i in range(9):
+        plt.subplot(3, 3, i + 1)
+        plt.imshow(images[i].astype("uint8"))
+        predicted_label = np.argmax(labels[i])
+        plt.title(class_names[predicted_label])
+        plt.axis("off")
+    plt.show()
