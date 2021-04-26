@@ -23,14 +23,25 @@ def unfreeze_model(in_model, back_layers_count):
 
 # UNDER CONSTRUCTION
 class ModelController:
+    available_models = ["MobileNetV2", "EfficientNetB0"]
     model = None
+    img_dim = 224
+    img_size = (img_dim, img_dim)
 
     def __init__(self, model_type):
         self.type = model_type
+        if self.type is self.available_models[0]:
+            self.model_type_inx = 0
+            self.img_dim = 224
+
+        self.img_size = (self.img_dim, self.img_dim)
 
     # TODO: EfficientNet Implementation
 
     def load_model_from_ckpt(self, ckpt_dir):
+        # the newly initialized base model has to be the same as the model which weights were saved to the checkpoint
+        # if the original model had augmentation layer at the beginning, the new model has to have it too
+        # Basic augmentation layer that almost does not change the input:
         data_augmentation = tf.keras.Sequential(
             [
                 preprocessing.RandomContrast(factor=0.01),
@@ -39,7 +50,7 @@ class ModelController:
 
         latest = tf.train.latest_checkpoint(ckpt_dir)
         # if model name is MobileNetV2 then
-        new_model = init.build_model(8, 224, data_augmentation)
+        new_model = init.build_model(8, self.img_dim, data_augmentation)
         # otherwise load the efficientnet weights
         new_model.load_weights(latest)
         self.model = new_model
@@ -54,23 +65,16 @@ class ModelController:
 
     def eval_image(self, image_path, dataset_path, predictions_to_be_shown=3, ckpt_path=None, plot=True):
         # determined by the model!!!!!!!!!!!!
-        img_dim = 224
-        img_size = (img_dim, img_dim)
 
         class_names = load_dataset.get_labels(dataset_path)
 
         # convert the input image to the right input format
-        img = image.load_img(image_path, target_size=img_size)
+        img = image.load_img(image_path, target_size=self.img_size)
         orig_img = img
         img = image.img_to_array(img)
         img = np.expand_dims(img, axis=0)
-
-        if self.model is None:
-            if ckpt_path is None:
-                print("Error! No model present nor valid checkpoint path provided")
-                return
-            # load the model from the latest checkpoint available
-            self.load_model_from_ckpt(ckpt_path)
+        
+        self.check_and_load(ckpt_path)
         # still no model available
         if self.model is None:
             print("Error! Model couldn't be loaded.")
@@ -88,3 +92,33 @@ class ModelController:
             graph_plotter.show_image_and_graph(orig_img, pred_prob, pred_labels)
 
         return pred_prob, pred_labels
+
+    def eval_validation_batch(self, dataset_path, batch_index=0, ckpt_path=None, plot=True):
+        train_ds, val_ds = load_dataset.get_dataset(dataset_path, self.img_size, 9)
+
+        self.check_and_load(ckpt_path)
+        # still no model available
+        if self.model is None:
+            print("Error! Model couldn't be loaded.")
+            return
+
+        for i in range(batch_index):
+            val_ds.as_numpy_iterator().next()
+        image_batch, label_batch = val_ds.as_numpy_iterator().next()
+        predictions = self.model.predict_on_batch(image_batch).flatten()
+
+        # Apply a sigmoid since our model returns logits
+        predictions = tf.nn.softmax(predictions)
+
+        print('Predictions:\n', predictions)
+        print('Labels:\n', label_batch)
+        if plot:
+            graph_plotter.show_9_image_predictions(image_batch, label_batch, val_ds.class_names)
+
+    def check_and_load(self, ckpt_path):
+        if self.model is None:
+            if ckpt_path is None:
+                print("Error! No model present nor valid checkpoint path provided")
+                return
+            # load the model from the latest checkpoint available
+            self.load_model_from_ckpt(ckpt_path)
