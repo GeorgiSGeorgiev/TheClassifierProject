@@ -2,7 +2,8 @@ import numpy as np
 import load_dataset
 import graph_plotter
 import tensorflow as tf
-import mobilenetV2_init as init
+import init_mobilenetV2 as init_mnV2
+import init_efficientnetB0 as init_enB0
 
 from tensorflow.keras import layers
 from keras.preprocessing import image
@@ -23,6 +24,7 @@ def unfreeze_model(in_model, back_layers_count):
 
 # UNDER CONSTRUCTION
 class ModelController:
+    """Stores a CNN model. Contains multiple functions that evaluate and save the model."""
     available_models = ["MobileNetV2", "EfficientNetB0"]
     model = None
     img_dim = 224
@@ -32,6 +34,9 @@ class ModelController:
         self.type = model_type
         if self.type is self.available_models[0]:
             self.model_type_inx = 0
+            self.img_dim = 224
+        elif self.type is self.available_models[1]:
+            self.model_type_inx = 1
             self.img_dim = 224
 
         self.img_size = (self.img_dim, self.img_dim)
@@ -49,8 +54,11 @@ class ModelController:
             name="img_augmentation")
 
         latest = tf.train.latest_checkpoint(ckpt_dir)
-        # if model name is MobileNetV2 then
-        new_model = init.build_model(8, self.img_dim, data_augmentation)
+        new_model = None
+        if self.type == "MobileNetV2":
+            new_model = init_mnV2.build_model(8, self.img_dim, data_augmentation)
+        elif self.type == "EfficientNetB0":
+            new_model = init_enB0.build_model(8, self.img_dim, data_augmentation)
         # otherwise load the efficientnet weights
         new_model.load_weights(latest)
         self.model = new_model
@@ -122,3 +130,30 @@ class ModelController:
                 return
             # load the model from the latest checkpoint available
             self.load_model_from_ckpt(ckpt_path)
+
+    def save_as_saved_model(self, destination_path=None, ckpt_path=None):
+        self.check_and_load(ckpt_path)
+        # still no model available
+        if self.model is None:
+            print("Error! Model couldn't be loaded.")
+            return
+
+        print("Saving the model...")
+        # Save the entire model as a SavedModel.
+        if destination_path is None:
+            self.model.save('saved_model/my_model')
+        else:
+            self.model.save(destination_path, include_optimizer=True)
+        print("Model saved successfully.")
+
+    def load_saved_model(self, model_path=None):
+        print("Loading the model into the controller...")
+        if model_path is None:
+            self.model = tf.keras.models.load_model('saved_model/my_model')
+        else:
+            self.model = tf.keras.models.load_model(model_path)
+        print()
+        # print("IMPORTANT NOTES: The restored model will not have additional training information.\n"
+        #     "If you are restoring a model that has training information, you don't need the saved optimizer values.\n"
+        #     "Additional warnings may appear.\n")
+        print("Model loaded successfully.")

@@ -33,7 +33,7 @@ def show_image_and_graph(image, pred_prob, pred_labels):
     plt.figure(figsize=(10, 6))
     plt.subplot(1, 2, 1)  # divide into two parts- left and right
     plt.imshow(image)
-    plt.title(pred_labels[0])
+    plt.title(pred_labels[0] + ", {:5.2f}%".format(100 * pred_prob[0]))
     plt.subplot(1, 2, 2)
     plot_values(pred_prob, pred_labels)
     plt.show()

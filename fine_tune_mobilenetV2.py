@@ -3,7 +3,7 @@ import load_dataset
 import graph_plotter
 import model_controller
 import tensorflow as tf
-from mobilenetV2_init import build_model
+from init_mobilenetV2 import build_model
 from tensorflow.keras.layers.experimental import preprocessing
 
 AUTOTUNE = tf.data.AUTOTUNE
@@ -37,13 +37,13 @@ data_augmentation = tf.keras.Sequential(
 
 model = build_model(num_classes=NUM_CLASSES, img_dim=img_dim, img_augmentation=data_augmentation)
 
-epochs = 25  # @param {type: "slider", min:8, max:80}
+epochs = 30  # @param {type: "slider", min:8, max:80}
 
 history = model.fit(train_dataset, epochs=epochs, validation_data=validation_dataset, verbose=1)
 graph_plotter.plot_hist(history)
 
 # Training
-checkpoint_path = "mobilenetV2_training/cp-{epoch:04d}.ckpt"
+checkpoint_path = "mobilenetV2_training_2/cp-{epoch:04d}.ckpt"
 checkpoint_dir = os.path.dirname(checkpoint_path)
 
 # Create a callback that saves the model's weights every 5 epochs
@@ -59,6 +59,6 @@ model.save_weights(checkpoint_path.format(epoch=0))
 # unfreeze the last 60 layers of the model
 model_controller.unfreeze_model(model, 60)
 
-epochs = 20  # @param {type: "slider", min:8, max:50}
+epochs = 25  # @param {type: "slider", min:8, max:50}
 hist = model.fit(train_dataset, epochs=epochs, callbacks=[cp_callback], validation_data=validation_dataset, verbose=1)
 graph_plotter.plot_hist(hist)
