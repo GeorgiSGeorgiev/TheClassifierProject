@@ -49,6 +49,35 @@ def plot_hist(training_data):
     plt.show()
 
 
+def plot_two_models_training(accuracy1, accuracy2, model1_name, model2_name):
+    bar_width = 0.35
+    number_of_items = len(accuracy1)
+    plt.subplots(figsize=(12, 8))
+
+    # Set X-axis bar positions
+    bar1 = np.arange(number_of_items)
+    bar2 = [x + bar_width for x in bar1]
+
+    cyber_blue = (0, 0.875, 1, 1)   # (R, G, B, alpha)
+    cyber_purple = (0.42, 0, 0.7, 1)
+
+    # Add the actual graph bars
+    plt.bar(bar1, accuracy1, color=cyber_blue, width=bar_width,
+            edgecolor='black', label=model1_name)
+    plt.bar(bar2, accuracy2, color=cyber_purple, width=bar_width,
+            edgecolor='black', label=model2_name)
+
+    # Add the X and Y axis description
+    plt.xlabel('Iteration', fontsize=13)
+    plt.ylabel('Accuracy', fontsize=13)
+    plt.xticks([r + bar_width / 2 for r in range(number_of_items)], range(number_of_items))
+
+    # Show graph legend
+    plt.legend()
+    # Show the whole graph
+    plt.show()
+
+
 def show_9_image_predictions(images, labels, class_names):
     plt.figure(figsize=(10, 10))
     for i in range(9):
