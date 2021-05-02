@@ -1,5 +1,5 @@
 import numpy as np
-import load_dataset
+import dataset_loader
 import graph_plotter
 import tensorflow as tf
 import init_mobilenetV2 as init_mnV2
@@ -41,8 +41,6 @@ class ModelController:
 
         self.img_size = (self.img_dim, self.img_dim)
 
-    # TODO: EfficientNet Implementation
-
     def load_model_from_ckpt(self, ckpt_dir):
         # the newly initialized base model has to be the same as the model which weights were saved to the checkpoint
         # if the original model had augmentation layer at the beginning, the new model has to have it too
@@ -74,7 +72,7 @@ class ModelController:
     def eval_image(self, image_path, dataset_path, predictions_to_be_shown=3, ckpt_path=None, plot=True):
         # determined by the model!!!!!!!!!!!!
 
-        class_names = load_dataset.get_labels(dataset_path)
+        class_names = dataset_loader.get_labels(dataset_path)
 
         # convert the input image to the right input format
         img = image.load_img(image_path, target_size=self.img_size)
@@ -102,7 +100,7 @@ class ModelController:
         return pred_prob, pred_labels
 
     def eval_validation_batch(self, dataset_path, batch_index=0, ckpt_path=None, plot=True):
-        train_ds, val_ds = load_dataset.get_dataset(dataset_path, self.img_size, 9)
+        train_ds, val_ds = dataset_loader.get_dataset(dataset_path, self.img_size, 9)
 
         self.check_and_load(ckpt_path)
         # still no model available

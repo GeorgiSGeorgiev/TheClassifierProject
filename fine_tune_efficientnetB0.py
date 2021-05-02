@@ -1,5 +1,5 @@
 import os
-import load_dataset
+import dataset_loader
 import graph_plotter
 import model_controller
 import tensorflow as tf
@@ -15,7 +15,7 @@ img_dim = 224
 IMG_SIZE = (img_dim, img_dim)
 batch_size = 64
 
-train_ds, val_ds = load_dataset.get_dataset(dataset_path, IMG_SIZE, batch_size)
+train_ds, val_ds = dataset_loader.get_dataset(dataset_path, IMG_SIZE, batch_size)
 
 NUM_CLASSES = len(train_ds.class_names)
 
