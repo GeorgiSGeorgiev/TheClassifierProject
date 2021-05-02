@@ -41,6 +41,26 @@ def get_dataset(dataset_path, image_dimensions, batch_size):
     return train_ds, val_ds
 
 
+def get_united_dataset(dataset_path, image_dimensions, batch_size):
+    """Loads the requested dataset from the given directory"""
+    class_names = list([name for name in os.listdir(dataset_path) if pth.isdir(pth.join(dataset_path, name))])
+    print(f"All classes: {class_names}")
+    data_dir = pathlib.Path(dataset_path)
+    image_count = len(list(data_dir.glob('*/*.jpg')))
+    print(f"Total image count: {image_count}")
+
+    dataset = tf.keras.preprocessing.image_dataset_from_directory(
+        data_dir,
+        label_mode="categorical",   # important, determines if the output will be binary or not
+        seed=123,
+        image_size=image_dimensions,
+        batch_size=batch_size,
+        labels="inferred",
+        class_names=class_names
+    )
+    return dataset
+
+
 def get_labels(dataset_path):
     """Loads the requested dataset from the given directory.
     Warning! The labels are taken directly from the different names of the class folders."""
