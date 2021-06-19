@@ -40,10 +40,10 @@ model = build_model(num_classes=NUM_CLASSES, img_dim=img_dim, img_augmentation=d
 epochs = 30  # @param {type: "slider", min:8, max:80}
 
 history = model.fit(train_dataset, epochs=epochs, validation_data=validation_dataset, verbose=1)
-graph_plotter.plot_hist(history)
+# graph_plotter.plot_hist(history)
 
 # Training
-checkpoint_path = "efficientnetB0_training/cp-{epoch:04d}.ckpt"
+checkpoint_path = "efficientnetB0_training_2/cp-{epoch:04d}.ckpt"
 checkpoint_dir = os.path.dirname(checkpoint_path)
 
 # Create a callback that saves the model's weights every 5 epochs

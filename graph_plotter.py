@@ -49,7 +49,7 @@ def plot_hist(training_data):
     plt.show()
 
 
-def plot_two_models_training(accuracy1, accuracy2, model1_name, model2_name):
+def plot_two_models_training(accuracy1, accuracy2, model1_name, model2_name, y_label=""):
     bar_width = 0.35
     number_of_items = len(accuracy1)
     plt.subplots(figsize=(12, 8))
@@ -69,7 +69,7 @@ def plot_two_models_training(accuracy1, accuracy2, model1_name, model2_name):
 
     # Add the X and Y axis description
     plt.xlabel('Iteration', fontsize=13)
-    plt.ylabel('Accuracy', fontsize=13)
+    plt.ylabel(y_label, fontsize=13)
     plt.xticks([r + bar_width / 2 for r in range(number_of_items)], range(number_of_items))
 
     # Show graph legend

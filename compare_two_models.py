@@ -15,6 +15,8 @@ accuracy_list_1 = []
 accuracy_list_2 = []
 loss_list_1 = []
 loss_list_2 = []
+accuracy_diff = []
+loss_diff = []
 
 dataset = dataset_loader.get_united_dataset(data_path, image_size, batch_size)
 val_batches = tf.data.experimental.cardinality(dataset)
@@ -38,28 +40,37 @@ for i in range(interval_count):
         else:   # train is not empty, so add new dataset segments to it
             train = train.concatenate(result[j])
     acc1, loss1 = fine_tuner.fine_tune(train, validation, model_name="MobileNetV2", image_dimension=image_dim,
-                                       epochs_classifier=2, epochs_train=2, reverse_save_freq=0)
+                                       epochs_classifier=25, epochs_train=25, reverse_save_freq=0, plot=False,
+                                       layers_to_be_trained=50)
     acc2, loss2 = fine_tuner.fine_tune(train, validation, model_name="EfficientNetB0", image_dimension=image_dim,
-                                       epochs_classifier=2, epochs_train=2, reverse_save_freq=0)
+                                       epochs_classifier=25, epochs_train=25, reverse_save_freq=0, plot=False,
+                                       layers_to_be_trained=100)
     accuracy_list_1.append(acc1)
     accuracy_list_2.append(acc2)
     loss_list_1.append(loss1)
     loss_list_2.append(loss2)
 
+    # TODO: what if the value is negative
+    accuracy_diff.append(acc2 - acc1)
+    loss_diff.append(loss1 - loss2)
+
 # there will be for cycle which will iterate through different data and save the different values to the array
-graph_plotter.plot_two_models_training(accuracy_list_1, accuracy_list_2, model_name_1, model_name_2)
-graph_plotter.plot_two_models_training(loss_list_1, loss_list_2, model_name_1, model_name_2)
-# TODO: add accuracy/loss label changer
-# TODO: count the accuracy/loss difference
-
-'''
-with open('accuracy_rates.txt', 'w') as file:
-    file.write(f"{model_name_1}, {model_name_2}\n")
-    for i in range(len(accuracy1)):
-        file.write(f"{accuracy1[i]}, {accuracy2[i]}\n")
+graph_plotter.plot_two_models_training(accuracy_list_1, accuracy_list_2, model_name_1, model_name_2, "Accuracy")
+graph_plotter.plot_two_models_training(loss_list_1, loss_list_2, model_name_1, model_name_2, "Loss")
+graph_plotter.plot_two_models_training(accuracy_diff, loss_diff,
+                                       "Accuracy difference", "Loss difference", "Differences")
 
 with open('accuracy_rates.txt', 'w') as file:
     file.write(f"{model_name_1}, {model_name_2}\n")
-    for i in range(len(loss1)):
-        file.write(f"{loss1[i]}, {loss2[i]}\n")
-'''
+    for i in range(len(accuracy_list_1)):
+        file.write(f"{accuracy_list_1[i]}, {accuracy_list_2[i]}\n")
+
+with open('loss_rates.txt', 'w') as file:
+    file.write(f"{model_name_1}, {model_name_2}\n")
+    for i in range(len(loss_list_1)):
+        file.write(f"{loss_list_1[i]}, {loss_list_2[i]}\n")
+
+with open('direct_comparisons.txt', 'w') as file:
+    file.write("Accuracy difference" + " Loss difference\n")
+    for i in range(len(accuracy_diff)):
+        file.write(f"{accuracy_diff[i]}, {loss_diff[i]}\n")

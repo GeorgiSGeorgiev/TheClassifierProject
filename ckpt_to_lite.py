@@ -1,7 +1,9 @@
 import tensorflow as tf
+import tensorflow_model_optimization as tfmot
+
 from model_controller import ModelController
 
-ckpt_path = "efficientnetB0_training"
+ckpt_path = "efficientnetB0_training_2"
 saved_path = "D:\\Gogi\\UK\\MFF_UK_2020_2021\\TheProject\\New_Progression\\efficientnetB0_SavedModel"
 
 # model_ctrl = ModelController("MobileNetV2")
