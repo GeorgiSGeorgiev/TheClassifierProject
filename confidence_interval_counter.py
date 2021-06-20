@@ -1,6 +1,5 @@
 import math
 import numpy as np
-import matplotlib.pyplot as plt
 
 k = 5
 t = 2.776
@@ -27,4 +26,4 @@ deg_of_freedom = math.sqrt(variance / (k-1))
 
 conf_interval = [mean_err_difference - deg_of_freedom * t, mean_err_difference + deg_of_freedom * t]
 
-print(conf_interval)
+print("The resulting 95% two-sided confidence interval: ", conf_interval)

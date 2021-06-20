@@ -50,7 +50,6 @@ for i in range(interval_count):
     loss_list_1.append(loss1)
     loss_list_2.append(loss2)
 
-    # TODO: what if the value is negative
     accuracy_diff.append(acc2 - acc1)
     loss_diff.append(loss1 - loss2)
 
