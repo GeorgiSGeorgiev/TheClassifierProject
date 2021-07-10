@@ -22,7 +22,7 @@ import pathlib
 def get_dataset(dataset_path, image_dimensions, batch_size):
     """Loads the requested dataset from the given directory into a training set and a validation set.
 
-         Parameters
+        Parameters
             ----------
             dataset_path : str
                 The system path to the dataset in the form of a string.
@@ -30,9 +30,9 @@ def get_dataset(dataset_path, image_dimensions, batch_size):
                 Input image dimensions to be loaded into the model.
             batch_size : int
                 Size of the batches into which the images will be loaded.
-         Returns
+        Returns
             ----------
-            (train_ds, val_ds) : tuple '(`tf.data.Dataset`, `tf.data.Dataset`)'
+            (train_ds, val_ds) : tuple `(`tf.data.Dataset`, `tf.data.Dataset`)`
                 Each dataset is a tuple `(images, labels)`, where `images` has shape
                 `(batch_size, image_size[0], image_size[1], num_channels)`,
                 and `labels` are an array of integers from 0 to (number of classes - 1).

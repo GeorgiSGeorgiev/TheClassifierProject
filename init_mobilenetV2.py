@@ -21,16 +21,16 @@ from tensorflow.keras import layers
 def build_model(num_classes, img_dim=224, img_augmentation=None):
     """Initializes a new MobileNetV2 model.
 
-     Parameters
-         ----------
-         num_classes : int
-             The number of dataset classes.
-         img_dim : int, optional
-             Input image dimensions (default is 224). In our case we don't include the top of the model so
-             image dimensions are fully adjustable.
-         img_augmentation : tf.keras.Sequential, optional
-             The Sequential layers which form the first new input augmentation layer (default is None)
-     """
+    Parameters
+        ----------
+        num_classes : int
+            The number of dataset classes.
+        img_dim : int, optional
+            Input image dimensions (default is 224). In our case we don't include the top of the model so
+            image dimensions are fully adjustable.
+        img_augmentation : tf.keras.Sequential, optional
+            The Sequential layers which form the first new input augmentation layer (default is None)
+    """
     # This layer sets all of the input values in the interval [-1,1]. This is required by MobileNetV2.
     preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input
 
