@@ -84,7 +84,7 @@ def get_united_dataset(dataset_path, image_dimensions, batch_size):
             ----------
             dataset_path : str
                 The system path to the dataset in the form of a string.
-            image_dimensions : int
+            image_dimensions : (int,int)
                 Input image dimensions to be loaded into the model.
             batch_size : int
                 Size of the batches into which the images will be loaded.
