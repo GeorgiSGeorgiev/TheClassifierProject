@@ -46,7 +46,7 @@ def build_model(num_classes, img_dim=224, img_augmentation=None):
 
     # Don't include the top categorization layer, we'll build it on our own.
     model = EfficientNetB0(input_shape=input_shape, include_top=False, input_tensor=x, weights="imagenet")
-    # So we get the original pretrained EfficientNetB0 model from the loaded inside Keras checkpoints which were trained
+    # We get the original pretrained EfficientNetB0 model from the loaded inside Keras checkpoints which were trained
     # on the ImageNet dataset. Via the input_tensor variable we add the augmentation to the final model.
     # The include_top False value says that we don't want to include the top layer from the checkpoint to the new model.
     # The pretrained model can classify different objects than our model, so we have to create a new top which will
@@ -61,11 +61,13 @@ def build_model(num_classes, img_dim=224, img_augmentation=None):
     # First add a new pooling layer to make the dimensions of the output we are classifying smaller.
     x = layers.GlobalAveragePooling2D(name="avg_pool")(model.output)
     print(f"Output after average pooling: {x}")
-    # Add a batch normalisation layer to increase the stability and the speed of the result model..
+    # Add a batch normalisation layer to increase the stability and the speed of the result model.
     x = layers.BatchNormalization()(x)
 
     top_dropout_rate = 0.2  # Determines the rate of the parameter zeroing.
     x = layers.Dropout(top_dropout_rate, name="top_dropout")(x)     # Add a top dropout layer.
+    # Dropout sets randomly during training some of the outputs to 0. This way it reduces intentionally
+    # the accuracy of the model to reduce the overfitting effect.
     outputs = layers.Dense(num_classes, activation="softmax", name="pred")(x)
     # Determine the output format at the end. First specify the number of classes to be classified.
     # Then the softmax function converts the output logits to the probabilities we desire.
