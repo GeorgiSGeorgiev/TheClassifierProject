@@ -87,13 +87,14 @@ def fine_tune(train_dataset, val_dataset, class_num=8, model_name="MobileNetV2",
     if active_augmentation:
         data_augment = tf.keras.Sequential(
             [
-                preprocessing.RandomFlip('horizontal'),
-                preprocessing.RandomRotation(0.15),
-                preprocessing.RandomContrast(factor=0.5),
-                preprocessing.RandomZoom(0.15),
+                preprocessing.RandomFlip('horizontal'),     # random horizontal flip with seed set to a constant value
+                preprocessing.RandomRotation(0.15),         # random image rotation with seed set to a const.
+                preprocessing.RandomContrast(factor=0.5),   # independently adjust the contrast on each channel
+                preprocessing.RandomZoom(0.15),             # random image zoom
                 preprocessing.RandomTranslation(height_factor=0.15, width_factor=0.15),
             ],
-            name="img_augmentation")
+            name="img_augmentation")    # The name of the layer. Later we can use it as a key to get the layer.
+
         # Initialize the models.
         if model_name == "MobileNetV2":
             model = init_mobilenetV2.build_model(num_classes=class_num, img_dim=image_dimension,
@@ -107,52 +108,56 @@ def fine_tune(train_dataset, val_dataset, class_num=8, model_name="MobileNetV2",
             model = init_mobilenetV2.build_model(num_classes=class_num, img_dim=image_dimension)
         elif model_name == "EfficientNetB0":
             model = init_efficientnetB0.build_model(num_classes=class_num, img_dim=image_dimension)
-    if model is None:
+    if model is None:   # There was an error in the model initialization.
         print("Model could not be loaded. Check the model name one more time.")
         return
 
-    # Trains only the last layer of the network which is the main classification layer.
+    # Trains only the last layer of the network which is the main classification layer via the train and validation
+    # datasets. Verbose just determines the console logging mode (verbose=1 -> progress bar + model accuracy and loss).
     class_history = model.fit(train_dataset, epochs=epochs_classifier, validation_data=validation_dataset, verbose=1)
 
     if plot:
         graph_plotter.plot_hist(class_history)  # Show a graph containing the full history of the learning process.
+    # End of the classification layer training.
 
-    # Trains the requested number of layers.
+    # Now train the requested number of network top layers.
+    # If the checkpoint saving option is not turned off then set it.
     if reverse_save_freq != 0:
         # Create a callback that saves the model's weights.
         cp_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=checkpoint_path,
-            verbose=1,
-            save_weights_only=True,
+            verbose=1,  # The logging mode.
+            save_weights_only=True,    # Save only the checkpoint, not the whole model. Can be adjusted by the user.
             save_freq=reverse_save_freq * len(train_dataset))
 
-        # Save the weights using the `checkpoint_path` format.
+        # Save the weights using the `checkpoint_path` format (the format that was defined with the string inside).
         model.save_weights(checkpoint_path.format(epoch=0))
 
-        # Unfreeze the last layers of the model.
+        # Unfreeze the top layers of the model.
         model_controller.unfreeze_model(model, layers_to_be_trained)
 
         # Do the training and save the training history.
-        hist = model.fit(train_dataset, epochs=epochs_train, callbacks=[cp_callback], validation_data=validation_dataset,
-                         verbose=1)
-    else:   # The checkpoint saver was turned off. Do the training without saving the checkpoints.
+        # Use the already defined checkpoint callbacks during the training.
+        # Verbose is once more the logging mode (verbose=1 -> progress bar + model accuracy and loss).
+        hist = model.fit(train_dataset, epochs=epochs_train, callbacks=[cp_callback],
+                         validation_data=validation_dataset, verbose=1)
+    else:   # Else the checkpoint saver was turned off. Do the training without saving the checkpoints.
         model_controller.unfreeze_model(model, layers_to_be_trained)
         hist = model.fit(train_dataset, epochs=epochs_train, validation_data=validation_dataset,
                          verbose=1)
     if plot:
         graph_plotter.plot_hist(hist)   # Show the whole training history to the user in the form of a graph.
 
-    # Return the accuracy and lost values from the last training iteration.
+    # Return the accuracy and loss values from the last training iteration.
     return hist.history.get('accuracy')[-1], hist.history.get('loss')[-1]
 
 
 # Example usage of the fine_tune method:
 '''
-data_path = "D:\\tmp\\cars3\\car_photos_3"
+data_path = "D:\\tmp\\cars4\\car_photos_4"
 image_dim = 224
 batch_size = 64
 image_size = (image_dim, image_dim)
 train_ds, val_ds = dataset_loader.get_dataset(data_path, image_size, batch_size)
 fine_tune(train_ds, val_ds, model_name="MobileNetV2", image_dimension=image_dim)    # call the training directly
-# fine_tune(train_ds, val_ds, model_name="EfficientNetB0", image_dimensions=image_dim)
 '''
