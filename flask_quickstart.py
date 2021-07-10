@@ -1,3 +1,16 @@
+"""The Flask server quickstart script
+
+This script directly starts the flask server which runs the neural network model and evaluates it as well.
+The script serves as a communication tool between the application and the model.
+It uses the HTTP communication protocol.
+
+Can be started directly and doesn't take any arguments. All the settings are directly inside the script.
+
+"""
+
+# Created by: Georgi Stoyanov Georgiev.
+# as part of the "Neural network architectures for mobile devices" bachelor thesis
+
 from model_controller import ModelController
 # Flask and werkzeug represent the server on which the model will be run.
 import flask
