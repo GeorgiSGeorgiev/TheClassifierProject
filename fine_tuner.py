@@ -11,7 +11,7 @@ seed(9)
 import tensorflow as tf
 tf.random.set_seed(9)
 
-import graph_plotter    # Used to draw learning diagrams.
+import graph_plotter        # Used to draw learning diagrams.
 import model_controller     # Used to unfreeze the last layers of the model.
 import init_mobilenetV2     # The initialization script of MobileNetV2.
 import init_efficientnetB0  # The initialization script of EfficientNetB0.
