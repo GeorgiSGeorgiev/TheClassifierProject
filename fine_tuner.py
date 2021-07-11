@@ -1,6 +1,8 @@
 # Created by: Georgi Stoyanov Georgiev.
 # as part of the "Neural network architectures for mobile devices" bachelor thesis
 
+# This script defines the main fine-tuning method which can fine-tune both MobileNetV2 and EfficientNetB0.
+
 # First set all of the random number generator seeds. Some seeds may be calculated using the import time of the
 # libraries. That's why we are setting the seeds right at the beginning.
 import os
