@@ -1,5 +1,7 @@
-import numpy as np
-import matplotlib.pyplot as plt
+import numpy as np                  # defines the Numpy arrays we are using below (and in the other scripts)
+import matplotlib.pyplot as plt     # main Python plotting library
+
+# This script contains only functions that create different graphs used by the other scripts.
 
 
 def get_top_values(predictions_np, string_class_names, top_k_el):
@@ -52,7 +54,7 @@ def plot_values(probabilities, labels):
 
         Parameters
             ----------
-            probabilities : np.array of float
+            probabilities : np.array of floats
                 Numpy array containing all the desired predictions saved as floats.
             labels : list of strings
                 List containing the class names which have to be shown on the diagram.
@@ -97,50 +99,96 @@ def show_image_and_graph(image, pred_prob, pred_labels):
 
 
 def plot_hist(training_data):
-    plt.plot(training_data.history["accuracy"])
-    plt.plot(training_data.history["val_accuracy"])
-    plt.title("Přesnost modelu")
-    plt.ylabel("přesnost")
-    plt.xlabel("epochy")
-    plt.legend(["trénování", "validace"], loc="upper left")
-    plt.show()
+    """Creates a graph which shows the whole training process measured in training and validation accuracy
+    throughout all epochs.
+
+        Parameters
+            ----------
+            training_data : `History` object
+                The training history returned directly from the model `fit` function which does the training process.
+    """
+    plt.plot(training_data.history["accuracy"])             # plot the training accuracy
+    plt.plot(training_data.history["val_accuracy"])         # plot the validation accuracy
+    plt.title("Model accuracy")                             # title of the graph
+    plt.ylabel("accuracy (%)")                              # the label of the y-axis
+    plt.xlabel("epochs")                                    # the label of the x-axis
+    plt.legend(["train", "validation"], loc="upper left")   # the legend of the graph
+    plt.show()                                              # show the graph to the user
 
 
-def plot_two_models_training(accuracy1, accuracy2, model1_name, model2_name, y_label=""):
-    bar_width = 0.35
-    number_of_items = len(accuracy1)
-    plt.subplots(figsize=(12, 8))
+def plot_two_models_training(values1, values2, model1_name, model2_name, x_label="Iteration", y_label=""):
+    """Creates a bar diagram which compares data taken from 2 different neural network models. The shown data may be
+    arbitrary.
 
-    # Set X-axis bar positions
-    bar1 = np.arange(number_of_items)
-    bar2 = [x + bar_width for x in bar1]
+        Parameters
+            ----------
+            values1 : np.array of floats
+                Data gathered from the first model training (top-1 accuracy or top-1 loss as an example).
+            values2 : np.array of floats
+                Data gathered from the second model training (top-1 accuracy or top-1 loss as an example).
+            model1_name : str
+                The actual name of the first model (will be shown in the legend).
+            model2_name : str
+                The actual name of the second model (will be shown in the legend).
+            x_label : str, optional
+                The label of the x-axis (default: "Iteration").
+            y_label : str, optional
+                The label of the y-axis (default: "").
+    """
+    bar_width = 0.35                        # the width of the different bars
+    number_of_items = len(values1)          # get the total number of values
+    if number_of_items != len(values2):     # if the number of samples in the both input arrays doesn't match, return
+        return
+    plt.figure(figsize=(12, 8))           # determine the size of the whole diagram
 
-    cyber_blue = (0, 0.875, 1, 1)   # (R, G, B, alpha)
+    # Set all X-axis bar positions
+    bars1 = np.arange(number_of_items)      # bars corresponding to the data from the first model
+    bars2 = [x + bar_width for x in bars1]  # bars corresponding to the data from the second model
+
+    # Defining the bar colors.
+    cyber_blue = (0, 0.875, 1, 1)           # (R, G, B, alpha)
     cyber_purple = (0.42, 0, 0.7, 1)
 
-    # Add the actual graph bars
-    plt.bar(bar1, accuracy1, color=cyber_blue, width=bar_width,
+    # Create the actual graph bars via the already defined variables.
+    plt.bar(bars1, values1, color=cyber_blue, width=bar_width,
             edgecolor='black', label=model1_name)
-    plt.bar(bar2, accuracy2, color=cyber_purple, width=bar_width,
+    plt.bar(bars2, values2, color=cyber_purple, width=bar_width,
             edgecolor='black', label=model2_name)
 
-    # Add the X and Y axis description
-    plt.xlabel('Iteration', fontsize=13)
+    # Add the X and Y axis description and set its font size.
+    plt.xlabel(x_label, fontsize=13)
     plt.ylabel(y_label, fontsize=13)
-    plt.xticks([r + bar_width / 2 for r in range(number_of_items)], range(number_of_items))
+    # Set the label frequency of the x-axis values.
+    plt.xticks([val_index + bar_width / 2 for val_index in range(number_of_items)], range(number_of_items))
 
-    # Show graph legend
+    # Show graph legend.
     plt.legend()
-    # Show the whole graph
+    # Show the whole graph.
     plt.show()
 
 
-def show_9_image_predictions(images, labels, class_names):
-    plt.figure(figsize=(10, 10))
-    for i in range(9):
-        plt.subplot(3, 3, i + 1)
-        plt.imshow(images[i].astype("uint8"))
-        predicted_label = np.argmax(labels[i])
-        plt.title(class_names[predicted_label])
-        plt.axis("off")
-    plt.show()
+def show_9_image_predictions(images, predictions, labels, class_names):
+    """Shows 9 images. Above each image is shown its prediction by the model and its true label.
+
+        Parameters
+            ----------
+            images : np.array of Image instances
+                9 images which have been evaluated. A batch of 9 images can be created to make the evaluation faster.
+            predictions : np.array of np.arrays of floats
+                Prediction data generated directly by the model. There is one array of predictions for each image.
+            labels : np.array of np.arrays of int
+                Labels directly from the dataset. Each image label is in the form of an array which has a 1 on the index
+                corresponding to the right class. All other values are 0.
+            class_names : np.array of str
+                The actual names of the classes which will be shown as part of the image titles.
+    """
+    plt.figure(figsize=(10, 10))    # size of the figure
+    for i in range(9):              # 9 images, cycle of 9 parts
+        plt.subplot(3, 3, i + 1)    # partition into the whole plot into 9 parts and select the (i+1)-st
+        plt.imshow(images[i].astype("uint8"))               # show the i-th image
+        best_prediction_inx = np.argmax(predictions[i])     # get the index of the best prediction
+        right_label = np.argmax(labels[i])                  # get the true label
+        # Format the title. First there will be the predicted value and then there will be the right label.
+        plt.title("Predicted: " + class_names[best_prediction_inx] + '\n' + "Right: " + class_names[right_label])
+        plt.axis("off")                                     # Turn off axis lines and labels.
+    plt.show()  # Show the plot.
