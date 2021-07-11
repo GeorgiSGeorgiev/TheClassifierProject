@@ -1,3 +1,5 @@
+# Defines only one function which initialises the base EfficientNetB0 model.
+
 # First set all of the random number generator seeds. Some seeds may be calculated using the import time of the
 # libraries. That's why we are setting the seeds right at the beginning.
 import os
