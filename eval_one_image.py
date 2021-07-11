@@ -39,7 +39,7 @@ elif len(sys.argv) == 5:
     model_name = sys.argv[0]
     model_format = sys.argv[1]
     model_path = sys.argv[2]
-    dataset_path = sys.argv[3]  # add label reading
+    dataset_path = sys.argv[3]
     image_path = sys.argv[4]
 else:
     sys.exit("ERROR! Invalid number of arguments...")
