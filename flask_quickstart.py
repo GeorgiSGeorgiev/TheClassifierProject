@@ -21,7 +21,7 @@ import werkzeug
 
 # The path to the checkpoints folder. The last checkpoint will be automatically found and loaded.
 # Can be adjusted by the user. Although it is important that the checkpoints match the model type from the controller.
-ckpt_path = "efficientnetB0_training_2_0"
+ckpt_path = "efficientnetB0_training_2_4"
 # Path to the dataset. The algorithms gets the labels from the structure of the dataset.
 dataset_path = "D:\\tmp\\cars4\\car_photos_4"
 
