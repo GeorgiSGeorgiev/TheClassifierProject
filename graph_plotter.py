@@ -3,49 +3,106 @@ import matplotlib.pyplot as plt
 
 
 def get_top_values(predictions_np, string_class_names, top_k_el):
+    """Fine tunes a selected CNN model via Keras API.
+
+        Parameters
+            ----------
+            predictions_np : numpy.array of array of float
+                Numpy array containing all the result predictions saved as floats. Our model returns an array of
+                arrays which has only one element inside. That one element is the array of predictions we want.
+            string_class_names : list of strings
+                List containing the class names to be binded with the probabilities.
+            top_k_el : int
+                Number of predictions to be shown on the diagram.
+
+        Returns
+            ----------
+            (pred_prob, pred_labels) : `(array of floats, array of strings)`
+                Return the k highest probabilities (sorted) and their class names (labels).
+    """
+    # Corner case: the specified value top_k_el is bigger than the size of the class names list.
     if top_k_el > len(string_class_names):
-        top_k_el = 3
-    # The k-th element will be in its final sorted position and all smaller elements will be moved before it
+        top_k_el = len(string_class_names) - 1
+
+    # predictions_np[0] contains the % predictions we desire. predictions_np actually contains only one item because we
+    # make only one set of predictions
+    # The argpartition call below ensures that the k-th (-top_k_el) element will be in its final sorted position,
+    # all smaller elements will be moved before it and all bigger after it. Then we get those indices of the
+    # elements bigger than the element at the index of (-top_k_el).
+    # So in the end we get the indices of the top k elements in an unordered fashion.
     biggest_ind = np.argpartition(predictions_np[0], -top_k_el)[-top_k_el:]
+    # Get the biggest prediction values according to the indices in the biggest_ind array.
     biggest_pred = [predictions_np[0][i] for i in biggest_ind]
+    # From the both new arrays create a list of tuples: (biggest_pred, biggest_ind)
     labeled_map = list(zip(biggest_pred, biggest_ind))
+    # Then sort the list according to the prediction values in an reversed order.
     labeled_map.sort(key=lambda x: x[0], reverse=True)
+    # The first element of each tuple is the prediction value we desire.
     pred_prob = [el[0] for el in labeled_map]
+    # Use the indices from the second element of each tuple to get the right class name.
     pred_labels = [string_class_names[el[1]] for el in labeled_map]
+    # Return the top k probabilities and their class names in the right order.
     return pred_prob, pred_labels
 
 
 def plot_values(probabilities, labels):
-    length = len(probabilities)
-    plt.grid(False)
-    plt.xticks(np.arange(length), labels)
-    a_list = list(range(0, 10))
-    a_list[:] = [x / 10 for x in a_list]
+    """Initializes a basic bar diagram but doesn't show it.
+    The first bar will be blue and the rest of them red.
+    This function can be used to show explicitly the best value bar.
 
-    plt.yticks(a_list)
-    thisplot = plt.bar(range(length), probabilities, color='red')
-    plt.ylim([0, 1])
+        Parameters
+            ----------
+            probabilities : np.array of float
+                Numpy array containing all the desired predictions saved as floats.
+            labels : list of strings
+                List containing the class names which have to be shown on the diagram.
+    """
+    length = len(probabilities)
+    plt.grid(False)     # no grid on the diagram
+    plt.xticks(np.arange(length), labels)   # the labels will be  shown on the x-axis
+    a_list = list(range(0, 10))
+    a_list[:] = [x / 10 for x in a_list]    # generate the possible percent values
+
+    plt.yticks(a_list)  # the y-axis will contain percents
+    thisplot = plt.bar(range(length), probabilities, color='red')   # create a red bar for each class
+    # The bar height is determined by the corresponding probability value.
+    plt.ylim([0, 1])    # set the limits of the y-axis
 
     thisplot[0].set_color('blue')
 
 
+# Uses the previous function
 def show_image_and_graph(image, pred_prob, pred_labels):
-    plt.figure(figsize=(10, 6))
-    plt.subplot(1, 2, 1)  # divide into two parts- left and right
-    plt.imshow(image)
+    """Creates a diagram which has a picture on its left side and a bars on its right side.
+    The bars represent the input probabilities and their labels are the class names from the input.
+    Uses the plot_values function to create the bars on the right side.
+
+        Parameters
+            ----------
+            image : A PIL Image instance.
+                The image to be shown on the left side of the diagram.
+            pred_prob : np.array of float
+                Numpy array containing all the desired predictions saved as floats.
+            pred_labels : list of strings
+                List containing the class names which have to be shown on the diagram.
+    """
+    plt.figure(figsize=(10, 6))     # Whole diagram size.
+    plt.subplot(1, 2, 1)            # Divide into two parts- left and right. Choose the left side at the same moment.
+    plt.imshow(image)               # Show the image on the left side.
+    # The diagram title will be the best prediction value.
     plt.title(pred_labels[0] + ", {:5.2f}%".format(100 * pred_prob[0]))
-    plt.subplot(1, 2, 2)
-    plot_values(pred_prob, pred_labels)
-    plt.show()
+    plt.subplot(1, 2, 2)            # Select the right side.
+    plot_values(pred_prob, pred_labels)     # Create the bar diagram on the right side.
+    plt.show()      # Show the whole diagram.
 
 
 def plot_hist(training_data):
     plt.plot(training_data.history["accuracy"])
     plt.plot(training_data.history["val_accuracy"])
-    plt.title("model accuracy")
-    plt.ylabel("accuracy")
-    plt.xlabel("epoch")
-    plt.legend(["train", "validation"], loc="upper left")
+    plt.title("Přesnost modelu")
+    plt.ylabel("přesnost")
+    plt.xlabel("epochy")
+    plt.legend(["trénování", "validace"], loc="upper left")
     plt.show()
 
 
