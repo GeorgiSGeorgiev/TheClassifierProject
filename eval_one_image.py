@@ -55,4 +55,3 @@ else:
 
 # Evaluate the image.
 model_ctrl.eval_image(image_path, dataset_path)
-
