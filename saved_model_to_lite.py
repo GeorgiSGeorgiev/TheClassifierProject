@@ -1,5 +1,7 @@
 import tensorflow as tf
 
+tf.random.set_seed(9)
+
 saved_path = "D:\\Gogi\\UK\\MFF_UK_2020_2021\\TheProject\\New_Progression\\efficientnetB0_SavedModel"
 
 # Convert the model
