@@ -1,3 +1,17 @@
+"""Definition of the Model Controller class
+
+This script is not meant to be run directly. It defines the whole Model Controller class which stores a CNN model.
+Contains multiple functions that evaluate and save the model as well.
+
+This script requires to have `tensorflow` installed within the user's Python environment.
+
+This script has to be imported as a separate "library" module. Except the Model Controller class it defines
+the following function as well:
+
+    * unfreeze_model - unfreezes the top k layers of the model which the user is going to fine-tune
+
+"""
+
 # First set all of the random number generator seeds. Some seeds may be calculated using the import time of the
 # libraries. That's why we are setting the seeds right at the beginning.
 import os
@@ -22,12 +36,20 @@ from keras.preprocessing import image       # Allows image loading and scaling.
 from tensorflow.keras.layers.experimental import preprocessing  # Augmentation layer.
 
 
-def unfreeze_model(in_model, back_layers_count):
+def unfreeze_model(in_model, top_layers_count):
     """Unfreeze the last back_layers_count number of layers in the in_model.
-    Doesn't modify the classification layers of the model."""
-    # We unfreeze the top layers while leaving BatchNorm last layers frozen.
+    Doesn't modify the classification layers of the model. Has no return value and directly changes the input model.
+
+        Parameters
+            ----------
+            in_model : Model
+                The TensorFlow neural network model which top layers will be unfrozen.
+            top_layers_count : int
+                The number of top layer to be unfrozen.
+    """
+    # We unfreeze the top layers while leaving BatchNorm top layers frozen.
     # This won't modify the classification layer during the training.
-    for layer in in_model.layers[-back_layers_count:]:
+    for layer in in_model.layers[-top_layers_count:]:
         if not isinstance(layer, layers.BatchNormalization):
             layer.trainable = True
 
@@ -39,7 +61,8 @@ def unfreeze_model(in_model, back_layers_count):
 
 
 class ModelController:
-    """Stores a CNN model. Contains multiple functions that evaluate and save the model."""
+    """Stores a CNN model. Contains multiple functions that evaluate and save the model. For now the supported models
+    are `MobileNetV2` and `EfficientNetB0`."""
     available_models = ["MobileNetV2", "EfficientNetB0"]
     model = None    # Variable which stores the resulting model.
     img_dim = 224   # Dimensions of the input images.
@@ -59,10 +82,17 @@ class ModelController:
         self.img_size = (self.img_dim, self.img_dim)
 
     def load_model_from_ckpt(self, ckpt_dir):
-        """Gets the checkpoint parent directory via ckpt_dir and then if the model types match builds the model and
-         loads the last available checkpoint to it."""
-        # the newly initialized base model has to be the same as the model which weights were saved to the checkpoint
-        # if the original model had augmentation layer at the beginning, the new model has to have it too
+        """Gets the checkpoint parent directory via ckpt_dir and then if the model types match, builds the model and
+        loads the last available checkpoint to it.
+
+            Parameters
+                ----------
+                ckpt_dir : str
+                    The desired checkpoints folder location. The last available checkpoint will be automatically loaded.
+
+        """
+        # The newly initialized base model has to be the same as the model which weights were saved to the checkpoint.
+        # If the original model had augmentation layer at the beginning, the new model has to have it too.
         # Below we add a basic augmentation layer that almost does not change the input. It will be active only
         # if we are training the model but it has to be there to maintain the model structure.
         data_augmentation = tf.keras.Sequential(
@@ -72,6 +102,12 @@ class ModelController:
             name="img_augmentation")
 
         latest = tf.train.latest_checkpoint(ckpt_dir)   # Get the latest checkpoint.
+        if latest is None:  # If no model was found.
+            print("No model checkpoint was found.")
+            if self.model is not None:
+                print("No changes to the current model were made.")
+            return
+
         new_model = None                                # Reset the model.
         # Build the new model according to the saved type name inside this class.
         if self.type == "MobileNetV2":
@@ -80,12 +116,22 @@ class ModelController:
             new_model = init_enB0.build_model(8, self.img_dim, data_augmentation)
         # Load the model weights directly from the variable which contains the loaded from the checkpoint weights.
         new_model.load_weights(latest)
-        self.model = new_model  # set the model variable
+        self.model = new_model  # Set the model variable.
         print("Model successfully loaded.")
 
     def test_loaded_model(self, test_images, test_labels):
         """Gets a test images and test labels and evaluates the loaded model on them. After that the results
-        are written as an standard output."""
+        are written as an standard output. It is a specific function and does not work with all dataset loading
+        methods because each of them has different return types. *It is not being used inside this project
+
+            Parameters
+                ----------
+                test_images : NumPy array of test images. Pixel values are from 0 to 255.
+                    The images on which the tests will be run.
+                test_labels : Numpy array of digit labels (integers in range 0-7)
+                    Class test labels generated directly by the dataset loading function.
+
+        """
         if self.model is None:
             return
         loss, acc = self.model.evaluate(test_images, test_labels, verbose=2)
@@ -93,12 +139,30 @@ class ModelController:
         print("Restored model, loss: {:5.2f}%".format(100 * loss))
 
     def eval_image(self, image_path, dataset_path, predictions_to_be_shown=3, ckpt_path=None, plot=True):
-        """Evaluates a specified image. The path to the image can be set in the image_path variable. The
-        dataset_path is needed to get the class names from the dataset file structure. The input parameter
-        "predictions_to_be_shown" determines the number of predictions to be shown to the user. The input parameter
-        "ckpt_path" has to be set if the user wants to load a different checkpoint to this instance and
-        the current model variable is set to NONE. The "plot" boolean turns on or off the graph plotter which shows
-        the evaluation results in a form of a column diagram."""
+        """Evaluates the model on the selected image. If no model is currently loaded, the `ckpt_path` has to be set.
+
+            Parameters
+                ----------
+                image_path : str
+                    Direct path to the image which has to be evaluated.
+                dataset_path : str
+                    Needed to get the class names from the dataset file structure. Has to be the path to the folder
+                    which contains the different class subfolders.
+                predictions_to_be_shown : int, optional
+                    Determines the number of predictions to be shown to the user (default = 3, or the maximal number
+                    of dataset classes if it is less than 3).
+                ckpt_path : str, optional
+                    Path to the checkpoint which will be loaded (default: None). Has to be set ONLY if the user wants to
+                    load a different checkpoint to this instance and the current model variable is set to NONE.
+                plot : bool, optional
+                    Turns ON or OFF the graph plotter which shows the evaluation results in a form of a column diagram
+                    (default: True).
+            Returns
+                ----------
+                (pred_prob, pred_labels) : `(array of floats, array of strings)`
+                Return the `predictions_to_be_shown` highest probabilities (sorted) and their class names (labels).
+
+        """
 
         class_names = dataset_loader.get_labels(dataset_path)
 
@@ -121,7 +185,7 @@ class ModelController:
         predictions_np = predictions.numpy()    # Convert the predictions to a numpy array.
         print('Predictions:\n', predictions_np)     # Write the numpy array on the console.
 
-        # Get the top n predictions and all the labels.
+        # Get the top predictions_to_be_shown predictions and all the labels.
         pred_prob, pred_labels = graph_plotter.get_top_values(predictions_np, class_names, predictions_to_be_shown)
         # If set to plotting, show the top predictions to the user in a column diagram.
         if plot:
@@ -130,12 +194,24 @@ class ModelController:
         return pred_prob, pred_labels
 
     def eval_validation_batch(self, dataset_path, batch_index=0, ckpt_path=None, plot=True):
-        """Evaluates a specified batch of images. The dataset_path is needed to get the class names from the dataset
-        file structure AND to load the whole dataset. From the validation part there is chosen the batch with index of
-        batch_index. The batch size is set to 9 and can not be changed. This gives exactly 9 predictions.
-        The input parameter "ckpt_path" has to be set if the user wants to load a different checkpoint to this
-        instance and the current model variable is set to NONE. The "plot" boolean turns on or off the graph plotter
-        which shows the evaluation results in a form of a column diagram."""
+        """Evaluates the specified batch of 9 images from the original dataset.
+
+            Parameters
+                ----------
+                dataset_path : str
+                    Needed to get the class names from the dataset file structure AND to load the whole dataset.
+                    The dataset is then used to get the requested image batch.
+                batch_index : int, optional
+                    From the validation part there is chosen the batch with index of batch_index (default: 0).
+                    The batch size is set to 9 and can not be changed from outside the code.
+                    This gives exactly 9 predictions.
+                ckpt_path : str, optional
+                    Path to the checkpoint which will be loaded (default: None). Has to be set ONLY if the user wants to
+                    load a different checkpoint to this instance and the current model variable is set to NONE.
+                plot : bool, optional
+                    Turns ON or OFF the graph plotter which shows the evaluation results in a form of a column diagram
+                    (default: True).
+        """
 
         # Load the whole dataset from the given path into batches of size 9.
         train_ds, val_ds = dataset_loader.get_dataset(dataset_path, self.img_size, 9)
@@ -152,7 +228,7 @@ class ModelController:
         for i in range(batch_index):
             val_ds.as_numpy_iterator().next()
         image_batch, label_batch = val_ds.as_numpy_iterator().next()    # the iteration has stopped one step earlier
-        predictions = self.model.predict_on_batch(image_batch).flatten()
+        predictions = self.model.predict_on_batch(image_batch)
         # the result is a list of lists which has only one list inside, so use flatten to get only that list as a result
 
         # Apply a sigmoid since our model returns logits which have to be represented as a percent values.
@@ -162,10 +238,16 @@ class ModelController:
         print('Labels:\n', label_batch)
         # If set to true, show the plot.
         if plot:
-            graph_plotter.show_9_image_predictions(image_batch, label_batch, val_ds.class_names)
+            graph_plotter.show_9_image_predictions(image_batch, predictions, label_batch, val_ds.class_names)
 
     def check_and_load(self, ckpt_path):
-        """If model is set to None and ckpt_path is not None then try to load the model from the last checkpoint."""
+        """If model is set to None and ckpt_path is not None then try to load the model from the last checkpoint.
+
+            Parameters
+                ----------
+                ckpt_path : str
+                    Path to the checkpoint which will be loaded.
+        """
         if self.model is None:
             if ckpt_path is None:
                 print("Error! No model present nor valid checkpoint path provided")
@@ -174,9 +256,17 @@ class ModelController:
             self.load_model_from_ckpt(ckpt_path)
 
     def save_as_saved_model(self, destination_path=None, ckpt_path=None):
-        """Convert the loaded model to a SavedModel format. If destination_path is set to None then save the model to
-        the local destination of this script. The variable "ckpt_path" is used only if the internal model equals None
-        and the "ckpt_path" is not None. Then it serves as a destination of the checkpoint to be loaded."""
+        """Convert the loaded model to a SavedModel format.
+
+            Parameters
+                ----------
+                destination_path : str, optional
+                    Path where the SavedModel will be saved (default : None). If set to None then save the model to
+                    the destination of this script.
+                ckpt_path : str, optional
+                    Path to the checkpoint which will be loaded (default : None). It is used only if the internal model
+                    is None and at the same time `ckpt_path` is not None.
+        """
         # If model is set to None and ckpt_path is not None then try to load the model.
         self.check_and_load(ckpt_path)
         # If still no model available:
@@ -195,9 +285,15 @@ class ModelController:
         print("Model saved successfully.")
 
     def load_saved_model(self, model_path=None):
-        """Loading a model from the SavedModel format directly to this instance. If "model_path" is None then
-        load from the default path which is 'saved_model/my_model'. Otherwise use "model_path" as a destination path
-        of the desired SavedModel."""
+        """Load a model from the SavedModel format directly to this instance of the Model Controller.
+
+            Parameters
+                ----------
+                model_path : str, optional
+                    If `model_path` is None then load from the default path which is `saved_model/my_model`.
+                    Otherwise use `model_path` as a destination path of the desired SavedModel from where it will
+                    be loaded.
+        """
         print("Loading the model into the controller...")
         if model_path is None:
             self.model = tf.keras.models.load_model('saved_model/my_model')
