@@ -1,3 +1,5 @@
+# This script only defines some functions which load the requested dataset or its class labels.
+
 # First set all of the random number generator seeds. Some seeds may be calculated using the import time of the
 # libraries. That's why we are setting the seeds right at the beginning.
 import os
@@ -26,7 +28,7 @@ def get_dataset(dataset_path, image_dimensions, batch_size):
             ----------
             dataset_path : str
                 The system path to the dataset in the form of a string.
-            image_dimensions : int
+            image_dimensions : (int,int)
                 Input image dimensions to be loaded into the model.
             batch_size : int
                 Size of the batches into which the images will be loaded.
