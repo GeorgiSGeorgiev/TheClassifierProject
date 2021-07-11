@@ -1,3 +1,12 @@
+"""EfficientNetB0 fine-tuning script
+
+This script directly starts the process of EfficientNetB0 fine-tuning. At the beginning of the script the model is
+being initialized, then its pretrained version is being loaded and in the end the fine-tuning takes place.
+
+Can be started directly and doesn't take any arguments. All the settings are directly inside the script.
+
+"""
+
 import os   # used to import the checkpoint path to the program
 import dataset_loader       # our script that loads our dataset
 import graph_plotter        # our script that creates graphs
@@ -47,7 +56,7 @@ data_augmentation = tf.keras.Sequential(
         preprocessing.RandomZoom(0.25, seed=9),              # random image zoom
         preprocessing.RandomTranslation(height_factor=0.15, width_factor=0.15, seed=9),
     ],
-    name="img_augmentation")   # The name of the layer. Later we can use it as a key to get the layer from `the network.
+    name="img_augmentation")   # The name of the layer. Later we can use it as a key to get the layer from the network.
 
 # Build the basic version of the model and add the data augmentation layer to it.
 model = build_model(num_classes=NUM_CLASSES, img_dim=img_dim, img_augmentation=data_augmentation)
