@@ -1,8 +1,8 @@
 BigCoupeOrSedan
 Hatchback
+MuscleCar
 PickUp
 SportsCar
-StationWagon
 SUV
 Unknown
 Van
