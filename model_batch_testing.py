@@ -6,10 +6,12 @@ Can be started directly and doesn't take any arguments. All the settings are dir
 
 """
 
+# Created by: Georgi Stoyanov Georgiev.
+# as part of the "Neural network architectures for mobile devices" bachelor thesis
 from model_controller import ModelController
 
 # Path to the checkpoint to be loaded to the model.
-ckpt_path = "efficientnetB0_training_2_0"
+ckpt_path = "efficientnetB0_training_2_4"
 # The dataset path from which the dataset will be taken.
 dataset_path = "D:\\tmp\\cars4\\car_photos_4"
 

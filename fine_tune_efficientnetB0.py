@@ -6,6 +6,8 @@ being initialized, then its pretrained version is being loaded and in the end th
 Can be started directly and doesn't take any arguments. All the settings are directly inside the script.
 
 """
+# Created by: Georgi Stoyanov Georgiev.
+# as part of the "Neural network architectures for mobile devices" bachelor thesis
 
 import os   # used to import the checkpoint path to the program
 import dataset_loader       # our script that loads our dataset

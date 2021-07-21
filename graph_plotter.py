@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt     # main Python plotting library
 
 # This script contains only functions that create different graphs used by the other scripts.
 
+# Created by: Georgi Stoyanov Georgiev.
+# as part of the "Neural network architectures for mobile devices" bachelor thesis
+
 
 def get_top_values(predictions_np, string_class_names, top_k_el):
     """Fine tunes a selected CNN model via Keras API.

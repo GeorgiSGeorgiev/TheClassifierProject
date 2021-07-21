@@ -22,9 +22,12 @@ II.) 1.) The name of the model (MobileNetV2 or EfficientNetB0).
 import sys
 from model_controller import ModelController
 
+# Created by: Georgi Stoyanov Georgiev.
+# as part of the "Neural network architectures for mobile devices" bachelor thesis
+
 model_name = "EfficientNetB0"                       # The name of the model (can be set by the user).
 model_format = "ckpt"                               # The format of the model checkpoints (can be set by the user).
-model_path = "efficientnetB0_training_2_0"          # The path to the checkpoints to be loaded (can be set by the user).
+model_path = "efficientnetB0_training_2_4"          # The path to the checkpoints to be loaded (can be set by the user).
 
 # Path to the dataset from which the dataset labels (class names) will be taken. It must be set as an argument.
 dataset_path = None

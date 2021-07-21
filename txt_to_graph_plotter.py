@@ -11,6 +11,9 @@ Can be started directly and doesn't take any arguments. All the settings are dir
 
 """
 
+# Created by: Georgi Stoyanov Georgiev.
+# as part of the "Neural network architectures for mobile devices" bachelor thesis
+
 import numpy as np      # The data are represented as Numpy arrays inside the memory.
 import graph_plotter    # The graph plotter script from this project.
 

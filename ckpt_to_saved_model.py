@@ -11,13 +11,14 @@ The script doesn't take any input arguments. The user only has to adjust the fir
 It is meant to show an example usage of the conversion to SavedModel functionality of the ModelController class.
 
 """
-
+# Created by: Georgi Stoyanov Georgiev.
+# as part of the "Neural network architectures for mobile devices" bachelor thesis
 from model_controller import ModelController
 
 # The path of the checkpoint which will be loaded. The first variable to be adjusted by the user.
 ckpt_path = "efficientnetB0_training_2_4"
 # The path to the saving location of the new SavedModel file. It is the second variable to be adjusted by the user.
-saved_path = "D:\\Gogi\\UK\\MFF_UK_2020_2021\\TheProject\\New_Progression\\efficientnetB0_SavedModel_2_4"
+saved_path = "New_Progression\\efficientnetB0_SavedModel_2_4"
 # Create an instance of the ModelController class. User has to adjust the name of the model according to the loaded
 # checkpoints. Incompatible models will result into an error.
 model_ctrl = ModelController("EfficientNetB0")
