@@ -4,6 +4,8 @@
 
 Contains different Python scripts meant to train, evaluate, and convert and compare CNN models. Uses directly TensorFlow 2 and its Keras API. The main TensorFlow 2 installation links are placed below. There are also links to some official documentations which have been used.
 
+This code is part of my (Georgi S. Georgiev's) bachelor thesis so with each usage it has to be cited. The thesis itself is in czech and it belongs to the Charles University in Prague. Permanent link to the thesis can be found here: http://hdl.handle.net/20.500.11956/148274.
+
 
 
 ## Structure
